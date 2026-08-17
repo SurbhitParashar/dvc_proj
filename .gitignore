@@ -51,4 +51,5 @@ site/
 
 # IDE files
 # .idea/
-# .vscode/
+.vscode/
+
