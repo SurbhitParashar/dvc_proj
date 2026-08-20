@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import json
+import yaml
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -10,6 +11,16 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score
 )
+
+
+# -----------------------------
+# Load parameters
+# -----------------------------
+
+with open("params.yaml", "r") as f:
+    params = yaml.safe_load(f)
+
+model_params = params["model"]
 
 
 # -----------------------------
@@ -41,9 +52,7 @@ features = [
     'store_and_fwd_flag'
 ]
 
-
 X = df[features]
-
 y = df['trip_duration']
 
 
@@ -54,8 +63,8 @@ y = df['trip_duration']
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
-    test_size=0.2,
-    random_state=42
+    test_size=model_params["test_size"],
+    random_state=model_params["random_state"]
 )
 
 
@@ -63,7 +72,14 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Model
 # -----------------------------
 
-model = LinearRegression()
+model = LinearRegression(
+    fit_intercept=model_params["fit_intercept"]
+)
+
+
+# -----------------------------
+# Training
+# -----------------------------
 
 model.fit(
     X_train,
@@ -100,9 +116,9 @@ r2 = r2_score(
 )
 
 
-print("MAE:", mae)
+print("MAE :", mae)
 print("RMSE:", rmse)
-print("R2:", r2)
+print("R2  :", r2)
 
 
 # -----------------------------
@@ -113,7 +129,6 @@ with open(
     "models/model.pkl",
     "wb"
 ) as f:
-
     pickle.dump(
         model,
         f
@@ -130,12 +145,10 @@ metrics = {
     "R2": r2
 }
 
-
 with open(
     "metrics.json",
     "w"
 ) as f:
-
     json.dump(
         metrics,
         f,
